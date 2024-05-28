@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day to Night Cycle</title>
+    <style>
+        body, html {
+            height: 200%; /* Ensuring there's enough room to scroll */
+            margin: 0;
+            overflow-x: hidden;
+            background-color: #87CEEB; /* Light blue sky at sunrise */
+            transition: background-color 1s linear; /* Smooth transition for background color */
+        }
+
+        #celestialBody, #moon {
+            position: fixed;
+            width: 100px; /* Initial size */
+            height: 100px; /* Initial size */
+            border-radius: 50%;
+            transition: left 0.5s linear, opacity 0.5s ease, width 0.5s ease, height 0.5s ease;
+            top: 50%; /* Vertically centered */
+            transform: translate(-50%, -50%);
+        }
+
+        #celestialBody {
+            left: 50%; /* Start at the center horizontally */
+            background: url('media/sun.png') no-repeat center center; /* Using an image for the sun */
+            background-size: cover; /* Ensure the image covers the entire element */
+        }
+
+        #moon {
+            left: -20%; /* Start from the east (out of view) */
+            background: url('media/moon.png') no-repeat center center; /* Using an image for the moon */
+            background-size: cover; /* Ensure the image covers the entire element */
+            opacity: 0; /* Start fully transparent */
+        }
+
+        #text {
+            position: fixed;
+            width: 100%;
+            text-align: center;
+            bottom: 10%;
+            font-size: 24px;
+            color: white;
+            opacity: 1; /* Start visible */
+            transition: opacity 2s ease;
+        }
+    </style>
+</head>
+<body>
+    <div id="celestialBody"></div>
+    <div id="moon"></div>
+    <div id="text">There's always a sunrise...</div>
+    <script>
+        window.addEventListener('scroll', function() {
+            var scrollPercent = document.documentElement.scrollTop / (document.documentElement.scrollHeight - document.documentElement.clientHeight);
+            var celestialBody = document.getElementById('celestialBody');
+            var moon = document.getElementById('moon');
+            var text = document.getElementById('text');
+
+            // Background color transitions for sky
+            if (scrollPercent <= 0.5) {
+                document.body.style.backgroundColor = `rgb(${135 + 120 * (2 * scrollPercent)}, ${206 - 176 * (2 * scrollPercent)}, ${255 - 135 * (2 * scrollPercent)})`; // Light blue to sunset red
+            } else {
+                document.body.style.backgroundColor = `rgb(${255 - 50 * (2 * (scrollPercent - 0.5))}, ${30 - 30 * (2 * (scrollPercent - 0.5))}, ${120 + 135 * (2 * (scrollPercent - 0.5))})`; // Sunset red to dark navy
+            }
+
+            // Sun's movement and fading
+            if (scrollPercent <= 0.5) {
+                celestialBody.style.left = `${50 + 50 * scrollPercent * 2}%`; // Moves to the right
+                celestialBody.style.opacity = 1 - scrollPercent * 2; // Fades out
+                text.innerText = "There's always a sunrise...";
+                text.style.opacity = 1 - scrollPercent * 2; // Text fades out with the sun
+            } else {
+                celestialBody.style.opacity = 0; // Sun completely fades out
+            }
+
+            // Moon's appearance and movement
+            if (scrollPercent >= 0.5) {
+                moon.style.left = `${-20 + 140 * (scrollPercent - 0.5)}%`; // Moves from left to center
+                moon.style.opacity = Math.min(1, (scrollPercent - 0.5) * 2); // Fades in
+                moon.style.width = `${100 + Math.max(0, 100 * (scrollPercent - 0.75) * 4)}px`; // Size increases after reaching center
+                moon.style.height = `${100 + Math.max(0, 100 * (scrollPercent - 0.75) * 4)}px`;
+
+                if (scrollPercent <= 0.75) {
+                    text.innerText = "There's always a sunset...";
+                    text.style.opacity = Math.min(1, (scrollPercent - 0.5) * 4); // Text fades in as moon appears
+                } else {
+                    text.style.opacity = 1 - (scrollPercent - 0.75) * 4; // Text fades out as moon enlarges
+                    if (scrollPercent > 0.9) {
+                        text.innerText = "It's up to you to choose to be there for it.";
+                        text.style.opacity = (scrollPercent - 0.9) * 10; // New text appears quickly
+                    }
+                }
+            } else {
+                moon.style.opacity = 0;
+            }
+
+            // Reset initial text when scrolling back to top
+            if (scrollPercent < 0.05) {
+                text.innerText = "There's always a sunrise...";
+                text.style.opacity = 1; // Ensure initial text is visible and fully opaque
+            }
+        });
+    </script>
+</body>
+</html>
